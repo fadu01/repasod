@@ -1,125 +1,186 @@
-let savedPass = '1111'
-let savedUser = 'fadu'
+const cards = document.getElementById('cards')
+const items = document.getElementById('items')
+const footer = document.getElementById('footer')
+const templateCard = document.getElementById('template-card').content
+const templateFooter = document.getElementById('template-footer').content
+const templateCarrito = document.getElementById('template-carrito').content
+const fragment = document.createDocumentFragment()
+let carrito = {}
 
-function login() {
-    let ingresar = false;
+// Eventos
+document.addEventListener('DOMContentLoaded', e => {
+    fetchData()
+    if (localStorage.getItem('carrito')) {
+        carrito = JSON.parse(localStorage.getItem('carrito'))
+        pintarCarrito()
+    }
+});
+cards.addEventListener('click', e => { addCarrito(e) });
+items.addEventListener('click', e => { btnAumentarDisminuir(e) })
 
-    for (let i = 2; i >= 0; i--) {
+// Traer productos
+const fetchData = () => {
 
-        let user = prompt('Ingresa tu nombre de usuario')
-
-        let userPass = prompt('Ingresá tu contraseña. Tenés ' + (i + 1) + ' intentos.');
-
-        if (user === savedUser && userPass === savedPass) {
-
-            alert('Usuario logueado exitosamente. Hola fadu');
-            ingresar = true;
-            break;
-
-        } else {
-
-            alert('Usuario o contraseña incorrecta. Te quedan ' + i + ' intentos.');
-
+    const data = [{
+            "precio": 2000,
+            "id": 1,
+            "title": "Aquaman #64",
+            "imagen": "./img/aquaman-n64.jpg"
+        },
+        {
+            "precio": 3000,
+            "id": 2,
+            "title": "Daredevil #11",
+            "imagen": "./img/daredevil-n11.jpg"
+        },
+        {
+            "precio": 3000,
+            "id": 3,
+            "title": "Deadpool #15",
+            "imagen": "./img/deadpool-n15.jpg"
+        },
+        {
+            "precio": 4500,
+            "id": 4,
+            "title": "Defenders #1",
+            "imagen": "./img/defenders-n1.jpg"
+        },
+        {
+            "precio": 2500,
+            "id": 5,
+            "title": "Dr. Strange #2",
+            "imagen": "./img/drstrange-n2.jpg"
+        },
+        {
+            "precio": 3500,
+            "id": 6,
+            "title": "Invencible Vol.3",
+            "imagen": "./img/invincible-vol3.jpg"
+        },
+        {
+            "precio": 2000,
+            "id": 7,
+            "title": "The Boys #16",
+            "imagen": "./img/theboys-n16.jpg"
+        },
+        {
+            "precio": 1500,
+            "id": 8,
+            "title": "Walking Dead #163",
+            "imagen": "./img/thewalkingdead-n163.jpg"
         }
-
-    }
-
-    return ingresar;
+    ]
+    pintarCards(data)
 }
 
-if (login()) {
-    alert("Ya podes empezar a cargar productos");
-} else {
-    alert("Tu cuenta fue bloqueada, oprime el link que te enviamos al mail para restablecerla");
+// Pintar productos
+const pintarCards = data => {
+    data.forEach(item => {
+        templateCard.querySelector('h5').textContent = item.title
+        templateCard.querySelector('p').textContent = item.precio
+        templateCard.querySelector('img').setAttribute("src", item.imagen)
+        templateCard.querySelector('button').dataset.id = item.id
+        const clone = templateCard.cloneNode(true)
+        fragment.appendChild(clone)
+    })
+    cards.appendChild(fragment)
 }
 
-class Producto {
-
-    constructor(titulo, editorial, genero, fecha, precio, id) {
-        this.titulo = titulo;
-        this.editorial = editorial;
-        this.genero = genero;
-        this.fecha = parseInt(fecha);
-        this.precio = parseFloat(precio);
-        this.id = id;
+// Agregar al carrito
+const addCarrito = e => {
+    if (e.target.classList.contains('btn-danger')) {
+        setCarrito(e.target.parentElement)
     }
-
-    asignarId(array) {
-        this.id = array.length;
-    }
+    e.stopPropagation()
 }
 
-const productos = [
-    new Producto('Deadpool', 'Marvel Comics', 'Superheroes', 1997, 2200, 1),
-    new Producto('DragonBall Z', 'Shueisha', 'Manga', 1984, 2000, 2),
-    new Producto('The Walking Dead', 'Image Comics', 'Zombies', 2003, 1300, 3),
-    new Producto('Invencible', 'Image Comics', 'Superheroes', 2002, 1700, 4),
-    new Producto('Batman', 'DC Comics', 'Superheroes', 1940, 2500, 5),
-    new Producto('The Boys', 'Dynamite', 'Superheroes', 2006, 1500, 6),
-]
-
-console.log(productos);
-
-let continuar = true;
-
-while (continuar) {
-    let ingreso = prompt("Ingresa: titulo, editorial, genero, fecha y precio. Separados por (-). Tipea X para finalizar)");
-
-    if (ingreso.toUpperCase() == "X") {
-        continuar = false;
-        break;
+const setCarrito = item => {
+    const producto = {
+        title: item.querySelector('h5').textContent,
+        precio: item.querySelector('p').textContent,
+        id: item.querySelector('button').dataset.id,
+        cantidad: 1
     }
 
-    let datos = ingreso.split("-");
-    const productoIngresado = new Producto(datos[0], datos[1], datos[2], datos[3], datos[4]);
-
-    productos.push(productoIngresado);
-    productoIngresado.asignarId(productos);
-    console.log(productos);
-}
-
-let criterio = prompt('Elegí el criterio deseado:\n1 - Título (A a Z) \n2 - Título (Z a A) \n3 - Precio (Menor a mayor) \n4 - Precio (Mayor a menor) \n5 - Fecha de publicación');
-
-function ordenar(criterio, array) {
-    let arrayOrdenado = array.slice(0);
-
-
-    switch (criterio) {
-        case '1':
-            return arrayOrdenado.sort((a, b) => a.titulo - b.titulo);
-        case '2':
-            return arrayOrdenado.sort((a, b) => b.titulo - a.titulo);
-        case '3':
-            return arrayOrdenado.sort((a, b) => a.precio - b.precio);
-        case '4':
-            return arrayOrdenado.sort((a, b) => b.precio - a.precio);
-        case '5':
-            return arrayOrdenado.sort((a, b) => a.fecha - b.fecha);
-        default:
-            alert('No es un criterio válido');
-            break;
+    if (carrito.hasOwnProperty(producto.id)) {
+        producto.cantidad = carrito[producto.id].cantidad + 1
     }
+
+    carrito[producto.id] = {...producto }
+
+    pintarCarrito()
 }
 
-function crearStringResultado(array) {
-    let info = '';
+const pintarCarrito = () => {
+    items.innerHTML = ''
 
-    array.forEach(elemento => {
-        info += 'Título: ' + elemento.titulo + '\nEditorial: ' + elemento.editorial + '\nGenero: ' + elemento.genero + '\nAño de publicación: ' + elemento.fecha + '\nPrecio: $' + elemento.precio + '.\n\n'
+    Object.values(carrito).forEach(producto => {
+        templateCarrito.querySelector('th').textContent = producto.id
+        templateCarrito.querySelectorAll('td')[0].textContent = producto.title
+        templateCarrito.querySelectorAll('td')[1].textContent = producto.cantidad
+        templateCarrito.querySelector('span').textContent = producto.precio * producto.cantidad
+        templateCarrito.querySelector('.btn-danger').dataset.id = producto.id
+        templateCarrito.querySelector('.btn-dark').dataset.id = producto.id
+
+        const clone = templateCarrito.cloneNode(true)
+        fragment.appendChild(clone)
+    })
+    items.appendChild(fragment)
+
+    pintarFooter()
+
+    localStorage.setItem('carrito', JSON.stringify(carrito))
+}
+
+const pintarFooter = () => {
+    footer.innerHTML = ''
+
+    if (Object.keys(carrito).length === 0) {
+        footer.innerHTML = `
+        <th scope="row" colspan="5">Carrito vacío - comience a comprar!</th>
+        `
+        return
+    }
+
+    // sumar cantidad y sumar totales
+    const nCantidad = Object.values(carrito).reduce((acc, { cantidad }) => acc + cantidad, 0)
+    const nPrecio = Object.values(carrito).reduce((acc, { cantidad, precio }) => acc + cantidad * precio, 0)
+    
+    
+    templateFooter.querySelectorAll('td')[0].textContent = nCantidad
+    templateFooter.querySelector('span').textContent = nPrecio
+    
+    const clone = templateFooter.cloneNode(true)
+    fragment.appendChild(clone)
+    
+    footer.appendChild(fragment)
+    
+    const botonVaciar = document.querySelector('#vaciar-carrito')
+    botonVaciar.addEventListener('click', () => {
+        carrito = {}
+        pintarCarrito()
     })
 
-    return info;
 }
 
-alert(crearStringResultado(ordenar(criterio, productos)));
+const btnAumentarDisminuir = e => {
 
-let generoElegido = prompt("Elegí un genero - Superheroes, manga o zombies")
-
-const filtrado = productos.filter((producto) => producto.genero.toLowerCase().includes(generoElegido.toLowerCase()))
-
-if (filtrado.length == 0) {
-    alert("Lo sentimos, no fue encontrado");
-} else {
-    const imprimible = filtrado.map((producto) => producto.titulo);
-    alert("Las historietas para el genero elegido son: \n- " + imprimible.join("\n- "))
+    if (e.target.classList.contains('btn-danger')) {
+        const producto = carrito[e.target.dataset.id]
+        producto.cantidad++
+            carrito[e.target.dataset.id] = {...producto }
+        pintarCarrito()
+    }
+    
+    if (e.target.classList.contains('btn-dark')) {
+        const producto = carrito[e.target.dataset.id]
+        producto.cantidad--
+            if (producto.cantidad === 0) {
+                delete carrito[e.target.dataset.id]
+            } else {
+                carrito[e.target.dataset.id] = {...producto }
+            }
+        pintarCarrito()
+    }
+    e.stopPropagation()
 }

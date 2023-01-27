@@ -1,0 +1,13 @@
+header {
+    background: radial-gradient(#DF2935, black);
+}
+
+img {
+    width: 100px;
+    margin-top: 10px;
+    margin-bottom: 10px;
+}
+
+.tituloPrincipal {
+    text-align: center;
+}
